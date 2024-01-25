@@ -12,7 +12,7 @@ setup(
     license='MIT',
     packages=find_packages(),
     install_requires=[
-        "urllib3"
+        "urllib3",
         "prettytable"
     ],
     classifiers=[
