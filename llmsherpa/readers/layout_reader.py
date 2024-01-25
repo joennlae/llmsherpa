@@ -1,7 +1,3 @@
-import prettytable
-from prettytable import MARKDOWN
-
-
 class Block:
     """
     A block is a node in the layout tree. It can be a paragraph, a list item, a table, or a section header. 
@@ -101,17 +97,20 @@ class Block:
         text = ""
         bboxes = []
         page_idxes = []
+        includes_table = False
         if include_section_info:
             text += self.parent_text() + "\n"
         if self.tag in ['list_item', 'para', 'table']:
             text += self.to_text(include_children=True, recurse=True)
             bboxes.append(self.bbox)
             page_idxes.append(self.page_idx)
+            if self.tag == 'table':
+                includes_table = True
         else:
             text += self.to_text()
             bboxes.append(self.bbox)
             page_idxes.append(self.page_idx)
-        return text, bboxes, page_idxes
+        return text, bboxes, page_idxes, includes_table
     
     def iter_children(self, node, level, node_visitor):
         """
@@ -361,11 +360,6 @@ class TableRow(Block):
         for cell in self.cells:
             cell_text = cell_text + " | " + cell.to_text()
         return cell_text
-    def to_table_row(self):
-        row_fields = []
-        for cell in self.cells:
-            row_fields.append(cell.to_text())
-        return row_fields
     def to_html(self, include_children=False, recurse=False):
         """
         Returns html for a <tr> with html from all the cells in the row as <td>
@@ -398,11 +392,6 @@ class TableHeader(Block):
         for cell in self.cells:
             cell_text = cell_text + " | " + "---"           
         return cell_text
-    def to_table_header(self):
-        header_fields = []
-        for cell in self.cells:
-            header_fields.append(cell.to_text())
-        return header_fields
     def to_html(self, include_children=False, recurse=False):
         """
         Returns html for a <th> with html from all the cells in the row as <td>
@@ -440,23 +429,6 @@ class Table(Block):
             text = text + header.to_text() + "\n"
         for row in self.rows:
             text = text + row.to_text() + "\n"
-
-        table = prettytable.PrettyTable()
-        table.set_style(MARKDOWN)
-        if len(self.headers) == 1:
-            table.field_names = self.headers[0].to_table_header()
-        else:
-            print("Multiple headers not supported for formatted table")
-            return text
-        len_fields = len(table.field_names)
-        for row in self.rows:
-            row_fields = row.to_table_row()
-            if len(row_fields) == len_fields:
-                table.add_row(row_fields)
-            else:
-                print("Number of fields in row not equal to number of headers")
-                return text
-        text = table.get_string()
         return text
 
     def to_html(self, include_children=False, recurse=False):
