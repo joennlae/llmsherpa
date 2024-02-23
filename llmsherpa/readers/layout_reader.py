@@ -95,22 +95,28 @@ class Block:
         Returns the text of the block with section information. This provides context to the text.
         """
         text = ""
-        bboxes = []
-        page_idxes = []
-        includes_table = False
+        metadata = {
+            "bboxes": [],
+            "page_idxes": [],
+            "includes_table": False,
+            "top": -1,
+            "left": -1
+        }
         if include_section_info:
             text += self.parent_text() + "\n"
         if self.tag in ['list_item', 'para', 'table']:
             text += self.to_text(include_children=True, recurse=True)
-            bboxes.append(self.bbox)
-            page_idxes.append(self.page_idx)
+            metadata["bboxes"].append(self.bbox)
+            metadata["page_idxes"].append(self.page_idx)
             if self.tag == 'table':
-                includes_table = True
+                metadata["includes_table"] = True
+                metadata["top"] = self.top
+                metadata["left"] = self.left
         else:
             text += self.to_text()
-            bboxes.append(self.bbox)
-            page_idxes.append(self.page_idx)
-        return text, bboxes, page_idxes, includes_table
+            metadata["bboxes"].append(self.bbox)
+            metadata["page_idxes"].append(self.page_idx)
+        return text, metadata
     
     def iter_children(self, node, level, node_visitor):
         """
