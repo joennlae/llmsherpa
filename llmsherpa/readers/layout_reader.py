@@ -100,7 +100,8 @@ class Block:
             "page_idxes": [],
             "includes_table": False,
             "top": -1,
-            "left": -1
+            "left": -1,
+            "table_html": ""
         }
         if include_section_info:
             text += self.parent_text() + "\n"
@@ -112,6 +113,7 @@ class Block:
                 metadata["includes_table"] = True
                 metadata["top"] = self.top
                 metadata["left"] = self.left
+                metadata["table_html"] = self.to_html(include_children=True, recurse=True)
         else:
             text += self.to_text()
             metadata["bboxes"].append(self.bbox)
